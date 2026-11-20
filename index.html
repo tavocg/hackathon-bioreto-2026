@@ -14,6 +14,8 @@
     .contenido ul { display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; padding: 0; list-style: none; }
     .contenido a { white-space: normal; }
     section { margin-block: 2.5rem; }
+    #acciones table { width: 100%; }
+    #acciones th code { white-space: normal; overflow-wrap: anywhere; }
     dt { margin-top: 1rem; font-weight: bold; }
     dd { margin-inline-start: 0; overflow-wrap: anywhere; }
   </style>
@@ -62,10 +64,27 @@ done</code></pre>
     </section>
     <section id="acciones">
       <h2>Acciones de la API</h2>
+      <table>
+        <caption>Acciones disponibles y costo por petición</caption>
+        <thead>
+          <tr><th scope="col">Tipo de acción</th><th scope="col">Para qué</th><th scope="col">Costo (◆)</th></tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row"><code>medir_ph</code></th><td>Qué tan ácido o básico está el medio.</td><td>2</td></tr>
+          <tr><th scope="row"><code>medir_poblacion</code></th><td>Cuántas bacterias hay en total.</td><td>2</td></tr>
+          <tr><th scope="row"><code>medir_mhet</code></th><td>El MHET, una sustancia que aparece al digerir el plástico.</td><td>5</td></tr>
+          <tr><th scope="row"><code>temperatura</code></th><td>Subir o bajar 1 °C la incubadora (delta 1 o -1).</td><td>3</td></tr>
+          <tr><th scope="row"><code>buffer</code></th><td>Mover el pH medio punto (delta 1 o -1).</td><td>3</td></tr>
+          <tr><th scope="row"><code>plastico</code></th><td>Servir plástico en el punto x, y.</td><td>4</td></tr>
+          <tr><th scope="row"><code>filtrar</code></th><td>Limpiar el medio de toda la placa.</td><td>8</td></tr>
+          <tr><th scope="row"><code>revivir</code></th><td>Empezar de nuevo una colonia que se extinguió.</td><td>40</td></tr>
+        </tbody>
+      </table>
       <p>La bitácora recoge este alias de Bash para enviar JSON al equipo mediante <code>POST</code>.</p>
       <pre><code>alias api='curl -s -H "Content-Type: application/json" -H "Authorization: Bearer $TOKEN" -X POST'</code></pre>
-      <p>Ejemplo de uso con el alias definido en una terminal interactiva:</p>
-      <pre><code>api "$BIO/api/equipo/accion" -d '{"tipo":"filtrar"}'</code></pre>
+      <p>El nombre de la acción va en el campo <code>tipo</code> del JSON. Por ejemplo, para medir el pH con el alias anterior:</p>
+      <pre><code>api "$BIO/api/equipo/accion" -d '{"tipo":"medir_ph"}'</code></pre>
+      <p>Con el script descargable, la misma petición se envía con <code>bash accion.sh medir_ph</code>.</p>
       <h3>Peticiones registradas</h3>
       <p>El script <code>accion.sh</code> envía una petición por ejecución. Elige el comando según la acción que quieras aplicar al equipo.</p>
       <dl>
