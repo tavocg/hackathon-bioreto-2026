@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BioReto · Bitácora del equipo</title>
+  <link rel="stylesheet" href="https://tavocg.github.io/semantic/semantic.css">
+  <style>
+    body { box-sizing: border-box; max-width: 54rem; margin-inline: auto; padding-inline: 1rem; }
+    pre { max-width: 100%; overflow-x: auto; }
+    header.cabecera { display: block; position: static; width: auto; height: auto; }
+    .cabecera h1 { margin-block: .35em; }
+    nav.contenido { display: block; position: static; width: auto; height: auto; }
+    .contenido ul { display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; padding: 0; list-style: none; }
+    .contenido a { white-space: normal; }
+    section { margin-block: 2.5rem; }
+    dt { margin-top: 1rem; font-weight: bold; }
+    dd { margin-inline-start: 0; overflow-wrap: anywhere; }
+  </style>
+</head>
+<body>
+  <main>
+    <header class="cabecera">
+      <small>BioReto · <time datetime="2026-11-20">20 de noviembre de 2026</time></small>
+      <h1>Bitácora del equipo</h1>
+    </header>
+    <p>Tras observar una mortalidad alta en el primer ensayo, el equipo cambió el sentido de los ajustes. La combinación que registró como solución del reto fue <strong>37 °C y pH 6,8</strong>.</p>
+    <nav class="contenido" aria-label="Contenido">
+      <ul>
+        <li><a href="#pruebas">Pruebas realizadas</a></li>
+        <li><a href="#monitor">Monitor de estado</a></li>
+        <li><a href="#acciones">Acciones de la API</a></li>
+      </ul>
+    </nav>
+    <section id="pruebas">
+      <h2>Pruebas realizadas</h2>
+      <ol>
+        <li><strong>Primer ajuste.</strong> El equipo subió el pH y bajó la temperatura. Observó que morían demasiadas bacterias.</li>
+        <li><strong>Cambio de estrategia.</strong> Subió la temperatura y ajustó el pH tomando como referencia los valores que había consultado en repositorios bacteriológicos.</li>
+        <li><strong>Lote infectado.</strong> Para que el lote sobreviviera, añadió plástico y filtró el MHET que se había producido.</li>
+        <li><strong>Alimentación posterior.</strong> Siguió añadiendo plástico para que el lote tuviera alimento.</li>
+      </ol>
+      <a href="bitacora.md">Leer la bitácora original</a>
+    </section>
+    <section id="monitor">
+      <h2>Monitor de estado</h2>
+      <p>Desde Bash, con <code>curl</code> y <code>jq</code> instalados, define la URL base del reto (sin barra final) y el token de tu equipo. Estos valores sirven para ambos scripts.</p>
+      <pre><code>read -rp 'URL base del reto: ' BIO
+read -rsp 'Token del equipo: ' TOKEN
+printf '\n'
+export BIO TOKEN</code></pre>
+      <p>Ejecuta <code>bash estado.sh</code> en esa terminal. El monitor muestra el JSON en color, omite cinco campos y espera dos segundos entre consultas. Pulsa <kbd>Ctrl</kbd> + <kbd>C</kbd> para detenerlo.</p>
+      <pre><code>clear
+while true; do
+  datos=$(curl -s "$BIO/api/equipo/estado" \
+    -H "Authorization: Bearer $TOKEN" |
+    jq -C 'del(.equipo, .evento, .prueba, .escala, .ritmo_min_s)')
+  printf '\033[H%s\033[J' "$datos"
+  sleep 2
+done</code></pre>
+      <a href="estado.sh" download>Descargar estado.sh</a>
+    </section>
+    <section id="acciones">
+      <h2>Acciones de la API</h2>
+      <p>La bitácora recoge este alias de Bash para enviar JSON al equipo mediante <code>POST</code>.</p>
+      <pre><code>alias api='curl -s -H "Content-Type: application/json" -H "Authorization: Bearer $TOKEN" -X POST'</code></pre>
+      <p>Ejemplo de uso con el alias definido en una terminal interactiva:</p>
+      <pre><code>api "$BIO/api/equipo/accion" -d '{"tipo":"filtrar"}'</code></pre>
+      <h3>Peticiones registradas</h3>
+      <p>El script <code>accion.sh</code> envía una petición por ejecución. Elige el comando según la acción que quieras aplicar al equipo.</p>
+      <dl>
+        <dt>Añadir plástico en (300, 250)</dt>
+        <dd><code>bash accion.sh plastico</code><pre><code>{"tipo":"plastico","x":300,"y":250}</code></pre></dd>
+        <dt>Subir la temperatura una unidad</dt>
+        <dd><code>bash accion.sh temperatura</code><pre><code>{"tipo":"temperatura","delta":1}</code></pre></dd>
+        <dt>Filtrar</dt>
+        <dd><code>bash accion.sh filtrar</code><pre><code>{"tipo":"filtrar"}</code></pre></dd>
+        <dt>Aplicar un ajuste de búfer de −1</dt>
+        <dd><code>bash accion.sh buffer</code><pre><code>{"tipo":"buffer","delta":-1}</code></pre></dd>
+      </dl>
+      <a href="accion.sh" download>Descargar accion.sh</a>
+    </section>
+  </main>
+</body>
+</html>
